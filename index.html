@@ -7,7 +7,7 @@
 <!-- SECURITY METATAGS -->
 <!-- 1. CSP: Restricts where scripts, styles, images, and fonts can load from. Blocks malicious injections and clickjacking. -->
 <!--    img-src includes https://hits.sh for the visitor counter badge (image-only, no JS/fetch required). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://hits.sh; connect-src 'self'; frame-ancestors 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://visitor-badge.laobi.icu; connect-src 'self'; frame-ancestors 'none';">
 <!-- 2. Prevent MIME-sniffing -->
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <!-- 3. Strict Referrer Policy -->
@@ -1004,9 +1004,13 @@
 
 <footer>
   <div>© 2026 ALLEN CLINT DIONISIO — BUILT WITH CARE</div>
-  <!-- VISITOR COUNTER: image-only badge (hits.sh), no JS/fetch needed, works within the site's CSP -->
-  <div class="visitor-counter">
-    <img src="acdportfolio.github.io/MyPortfolio/" alt="Visitor count" loading="lazy">
+  <!-- VISITOR COUNTER: image-only badge (visitor-badge.laobi.icu — the widely-used GitHub-profile counter service),
+       no JS/fetch needed, works within the site's CSP. If it ever fails to load, onerror hides the wrapper
+       instead of leaving a broken-image icon visible. -->
+  <div class="visitor-counter" id="visitorCounterWrap">
+    <img src="https://visitor-badge.laobi.icu/badge?page_id=allen-clint-dionisio.portfolio&color=2dd4bf&left_color=11172a"
+         alt="Visitor count" loading="lazy"
+         onerror="document.getElementById('visitorCounterWrap').style.display='none'">
   </div>
 </footer>
 
