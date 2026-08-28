@@ -5,4 +5,4 @@ compatibility_date = "2026-08-01"
 # Non-secret config. This file IS safe to commit to a (private or public) repo —
 # secrets never go here, they're set separately via `wrangler secret put` (see SETUP.md).
 [vars]
-ALLOWED_ORIGIN = "https://yourusername.github.io"
+ALLOWED_ORIGIN = "acdportfolio.github.io/MyPortfolio"
