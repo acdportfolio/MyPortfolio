@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <!-- SECURITY METATAGS -->
-<!-- 1. CSP: Restricts where scripts, styles, images, and fonts can load from. Blocks malicious injections and clickjacking. -->
-<!--    img-src includes https://hits.sh for the visitor counter badge (image-only, no JS/fetch required). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://visitor-badge.laobi.icu; connect-src 'self'; frame-ancestors 'none';">
+<!-- 1. CSP: Restricts where scripts, styles, images, fonts, and network requests can load from/to. Blocks malicious injections and clickjacking. -->
+<!--    img-src includes https://visitor-badge.laobi.icu for the visitor counter badge (image-only, no JS/fetch required). -->
+<!--    connect-src includes the chatbot's Cloudflare Worker endpoint — REPLACE the placeholder below with your -->
+<!--    real Worker URL after deploying it (see /worker/SETUP.md). Nothing else is allowed to receive fetch() calls. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://visitor-badge.laobi.icu; connect-src 'self' https://portfolio-api.YOUR-SUBDOMAIN.workers.dev; frame-ancestors 'none';">
 <!-- 2. Prevent MIME-sniffing -->
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <!-- 3. Strict Referrer Policy -->
@@ -459,6 +461,105 @@
   }
   .visitor-counter img{
     height:20px; border-radius:4px; display:block;
+  }
+
+  /* ---------- CHAT WIDGET ---------- */
+  .chat-widget{position:fixed; right:22px; bottom:22px; z-index:150;}
+  .chat-toggle-btn{
+    width:58px; height:58px; border-radius:50%; border:none; cursor:pointer;
+    background:var(--teal); color:#04120f;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 10px 28px -8px rgba(45,212,191,0.55);
+    transition:transform .2s ease, background .2s ease;
+  }
+  .chat-toggle-btn:hover{transform:translateY(-2px) scale(1.03); background:#5eead4;}
+  .chat-toggle-btn svg{width:26px; height:26px;}
+  .chat-toggle-btn .icon-close{display:none;}
+  .chat-toggle-btn[aria-expanded="true"] .icon-chat{display:none;}
+  .chat-toggle-btn[aria-expanded="true"] .icon-close{display:block;}
+
+  .chat-panel{
+    position:absolute; right:0; bottom:74px;
+    width:340px; max-width:calc(100vw - 44px);
+    height:460px; max-height:70vh;
+    background:var(--panel-solid); border:1px solid var(--border);
+    border-radius:16px; overflow:hidden;
+    display:flex; flex-direction:column;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,0.6);
+  }
+  .chat-panel[hidden]{display:none;}
+
+  .chat-panel-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px; border-bottom:1px solid var(--border-soft);
+    background:linear-gradient(180deg, #131c2c, transparent);
+  }
+  .chat-panel-title{font-size:14.5px; font-weight:600; color:var(--text);}
+  .chat-panel-sub{font-size:11.5px; color:var(--text-dim); margin-top:2px;}
+  .chat-close-btn{
+    background:none; border:none; color:var(--text-dim); font-size:20px;
+    cursor:pointer; line-height:1; padding:4px 8px; border-radius:6px;
+  }
+  .chat-close-btn:hover{color:var(--text); background:rgba(255,255,255,0.06);}
+
+  .chat-messages{
+    flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:10px;
+  }
+  .chat-msg{
+    font-size:13.5px; line-height:1.55; padding:10px 13px; border-radius:12px; max-width:86%;
+    word-wrap:break-word;
+  }
+  .chat-msg-bot{
+    background:#151d2c; color:#dbe3f0; align-self:flex-start; border-bottom-left-radius:4px;
+  }
+  .chat-msg-user{
+    background:rgba(45,212,191,0.14); color:#eafffb; align-self:flex-end; border-bottom-right-radius:4px;
+  }
+  .chat-typing{opacity:0.6; font-style:italic;}
+
+  .chat-input-row{
+    display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--border-soft);
+  }
+  .chat-input-row input{
+    flex:1; background:#0d1320; border:1px solid var(--border); border-radius:9px;
+    color:var(--text); font-family:'Inter', sans-serif; font-size:13.5px; padding:10px 12px;
+  }
+  .chat-input-row input:focus{outline:none; border-color:var(--teal-dim);}
+  .chat-send-btn{
+    width:38px; height:38px; border-radius:9px; border:none; background:var(--teal);
+    color:#04120f; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:15px; flex-shrink:0; transition:background .2s ease;
+  }
+  .chat-send-btn:hover{background:#5eead4;}
+  .chat-send-btn:disabled{opacity:0.5; cursor:not-allowed;}
+
+  .chat-contact-row{
+    padding:10px 14px 14px; font-size:12px; color:var(--text-dim);
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  }
+  .chat-contact-row[hidden]{display:none;}
+  .chat-link-btn{
+    background:none; border:none; color:var(--teal); font-weight:600; font-size:12px;
+    cursor:pointer; padding:0; text-decoration:underline;
+  }
+  .chat-contact-form{
+    display:flex; flex-direction:column; gap:8px; padding:0 14px 14px;
+  }
+  .chat-contact-form[hidden]{display:none;}
+  .chat-contact-form input, .chat-contact-form textarea{
+    background:#0d1320; border:1px solid var(--border); border-radius:8px;
+    color:var(--text); font-family:'Inter', sans-serif; font-size:12.5px; padding:9px 11px;
+    resize:vertical;
+  }
+  .chat-contact-form input:focus, .chat-contact-form textarea:focus{outline:none; border-color:var(--teal-dim);}
+  .chat-contact-submit{
+    align-self:flex-end; background:var(--teal); color:#04120f; border:none; font-weight:600;
+    font-size:12.5px; padding:8px 16px; border-radius:8px; cursor:pointer;
+  }
+  .chat-contact-submit:hover{background:#5eead4;}
+
+  @media (max-width:480px){
+    .chat-panel{width:calc(100vw - 32px); right:-6px;}
   }
 
   /* ---------- RESPONSIVE ---------- */
@@ -1014,6 +1115,44 @@
 </footer>
 
 
+<!-- ================= CHATBOT WIDGET ================= -->
+<!-- Talks only to the Cloudflare Worker below — no API key ever touches this page. -->
+<div class="chat-widget" id="chatWidget">
+  <button class="chat-toggle-btn" id="chatToggleBtn" aria-expanded="false" aria-controls="chatPanel" aria-label="Chat with Allen's assistant">
+    <svg class="icon-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+
+  <div class="chat-panel" id="chatPanel" role="dialog" aria-label="Chat with Allen's assistant" hidden>
+    <div class="chat-panel-header">
+      <div>
+        <div class="chat-panel-title">Ask about Allen</div>
+        <div class="chat-panel-sub">AI assistant &middot; usually replies instantly</div>
+      </div>
+      <button class="chat-close-btn" id="chatCloseBtn" aria-label="Close chat">&times;</button>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg chat-msg-bot">Hi! I'm Allen's portfolio assistant. Ask me about his D365/Power Platform experience, certifications, projects, or availability.</div>
+    </div>
+
+    <form class="chat-input-row" id="chatForm">
+      <input id="chatInput" type="text" placeholder="Type a message…" maxlength="800" autocomplete="off" required>
+      <button type="submit" class="chat-send-btn" aria-label="Send message">➤</button>
+    </form>
+
+    <div class="chat-contact-row" id="chatContactRow" hidden>
+      <span>Want a direct reply?</span>
+      <button type="button" class="chat-link-btn" id="chatLeaveEmailBtn">Leave your email</button>
+    </div>
+    <form class="chat-contact-form" id="chatContactForm" hidden>
+      <input id="chatContactEmail" type="email" placeholder="you@example.com" required>
+      <textarea id="chatContactNote" placeholder="Anything to add? (optional)" rows="2"></textarea>
+      <button type="submit" class="chat-contact-submit">Send to Allen</button>
+    </form>
+  </div>
+</div>
+
 <script>
   // Active nav link on scroll
   const sections = document.querySelectorAll('section[id]');
@@ -1138,6 +1277,130 @@
     el.setAttribute('download', RESUME_FILENAME);
   });
 
+  // ---------- CHATBOT WIDGET ----------
+  // IMPORTANT: replace this with your deployed Cloudflare Worker URL (see /worker/SETUP.md),
+  // and add that same URL to the CSP <meta> tag's connect-src at the top of this file.
+  // No API key or webhook URL ever lives in this file — the Worker holds those as secrets.
+  const CHAT_API = "https://portfolio-api.YOUR-SUBDOMAIN.workers.dev";
+
+  (function initChat(){
+    const widget = document.getElementById('chatWidget');
+    if (!widget) return;
+
+    const toggleBtn = document.getElementById('chatToggleBtn');
+    const panel = document.getElementById('chatPanel');
+    const closeBtn = document.getElementById('chatCloseBtn');
+    const messagesEl = document.getElementById('chatMessages');
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('chatInput');
+    const sendBtn = form.querySelector('.chat-send-btn');
+    const contactRow = document.getElementById('chatContactRow');
+    const leaveEmailBtn = document.getElementById('chatLeaveEmailBtn');
+    const contactForm = document.getElementById('chatContactForm');
+    const contactEmail = document.getElementById('chatContactEmail');
+    const contactNote = document.getElementById('chatContactNote');
+
+    let history = [];
+    let sending = false;
+
+    function openPanel(){
+      panel.hidden = false;
+      toggleBtn.setAttribute('aria-expanded', 'true');
+      input.focus();
+    }
+    function closePanel(){
+      panel.hidden = true;
+      toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+    toggleBtn.addEventListener('click', () => panel.hidden ? openPanel() : closePanel());
+    closeBtn.addEventListener('click', closePanel);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !panel.hidden) closePanel();
+    });
+
+    function addMessage(text, who){
+      const div = document.createElement('div');
+      div.className = 'chat-msg chat-msg-' + who;
+      div.textContent = text;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return div;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = input.value.trim();
+      if (!msg || sending) return;
+
+      sending = true;
+      sendBtn.disabled = true;
+      input.value = '';
+      addMessage(msg, 'user');
+      const typingEl = addMessage('…', 'bot');
+      typingEl.classList.add('chat-typing');
+
+      try {
+        const res = await fetch(CHAT_API + '/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg, history }),
+        });
+        const data = await res.json().catch(() => ({}));
+        typingEl.remove();
+
+        if (!res.ok) {
+          addMessage(data.error || "Something went wrong — please try again in a moment.", 'bot');
+        } else {
+          addMessage(data.reply, 'bot');
+          history.push({ role: 'user', content: msg });
+          history.push({ role: 'assistant', content: data.reply });
+          contactRow.hidden = false;
+        }
+      } catch (err) {
+        typingEl.remove();
+        addMessage("I couldn't reach the assistant. Please use the Email Me button below instead.", 'bot');
+      } finally {
+        sending = false;
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    });
+
+    leaveEmailBtn.addEventListener('click', () => {
+      contactRow.hidden = true;
+      contactForm.hidden = false;
+      contactEmail.focus();
+    });
+
+    contactForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = contactEmail.value.trim();
+      const note = contactNote.value.trim();
+      if (!email) return;
+
+      const submitBtn = contactForm.querySelector('.chat-contact-submit');
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch(CHAT_API + '/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, note }),
+        });
+        if (res.ok) {
+          addMessage("Thanks — Allen will follow up at " + email + ".", 'bot');
+          contactForm.hidden = true;
+        } else {
+          const data = await res.json().catch(() => ({}));
+          addMessage(data.error || "Couldn't send that — please use the Email Me button instead.", 'bot');
+        }
+      } catch {
+        addMessage("Couldn't send that — please use the Email Me button instead.", 'bot');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  })();
 </script>
 
 </body>
