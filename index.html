@@ -9,7 +9,7 @@
 <!--    img-src includes https://visitor-badge.laobi.icu for the visitor counter badge (image-only, no JS/fetch required). -->
 <!--    connect-src includes the chatbot's Cloudflare Worker endpoint — REPLACE the placeholder below with your -->
 <!--    real Worker URL after deploying it (see /worker/SETUP.md). Nothing else is allowed to receive fetch() calls. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://visitor-badge.laobi.icu; connect-src 'self' https://portfolio-api.YOUR-SUBDOMAIN.workers.dev; frame-ancestors 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://visitor-badge.laobi.icu; connect-src 'self' https://portfolio-api.acdportfolio.github.io/MyPortfolio.workers.dev; frame-ancestors 'none';">
 <!-- 2. Prevent MIME-sniffing -->
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <!-- 3. Strict Referrer Policy -->
@@ -1281,7 +1281,7 @@
   // IMPORTANT: replace this with your deployed Cloudflare Worker URL (see /worker/SETUP.md),
   // and add that same URL to the CSP <meta> tag's connect-src at the top of this file.
   // No API key or webhook URL ever lives in this file — the Worker holds those as secrets.
-  const CHAT_API = "https://portfolio-api.YOUR-SUBDOMAIN.workers.dev";
+  const CHAT_API = "https://portfolio-api.acdportfolio.github.io/MyPortfolio.workers.dev";
 
   (function initChat(){
     const widget = document.getElementById('chatWidget');
